@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/lorenzobenvenuti/docker-registry-client/registry"
@@ -32,15 +33,23 @@ func getRegistry() *registry.Registry {
 	return hub
 }
 
+func print(items []string) {
+	for _, item := range items {
+		fmt.Printf("%s\n", item)
+	}
+}
+
 func main() {
-	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
+	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
+	api := NewRegistryApi(getRegistry())
+	switch cmd {
 	case repositories.FullCommand():
-		printRepositories(getRegistry())
-	case search.FullCommand():
-		searchExpression(getRegistry(), *expression)
+		print(api.GetAllRepositories())
 	case images.FullCommand():
-		printImages(getRegistry())
+		print(api.GetAllImages())
+	case search.FullCommand():
+		print(api.SearchImages(*expression))
 	case delete.FullCommand():
-		deleteManifest(getRegistry(), *image)
+		api.DeleteImage(*image)
 	}
 }
