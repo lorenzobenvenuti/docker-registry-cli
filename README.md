@@ -68,6 +68,7 @@ $ docker exec mycontainer /bin/registry garbage-collect /etc/docker/registry/con
   * Environment variables
   * Command (`docker-registry-cli config "registry=http://host:port"`)
 * Support regular expressions in search
+* Implement garbage-collection (hopefully it will be included in Docker Registry API!?)
 * Tree view; something like
 ```
 lorenzo
