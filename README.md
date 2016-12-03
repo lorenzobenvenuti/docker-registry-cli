@@ -78,3 +78,4 @@ lorenzo
    ├─ 1.0
    └─ 1.1
 ```
+* Use the autocompletion feature of the [kingpin](https://github.com/alecthomas/kingpin) command line parser

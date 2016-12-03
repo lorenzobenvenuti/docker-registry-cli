@@ -58,7 +58,11 @@ func deleteManifest(hub *registry.Registry, image string) {
 	if len(tokens) != 2 {
 		panic("Invalid image, must be in the form image:tag")
 	}
-	err := hub.DeleteManifest(tokens[0], tokens[1])
+	digest, err := hub.ManifestDigest(tokens[0], tokens[1])
+	if err != nil {
+		panic(err)
+	}
+	err = hub.DeleteManifest(tokens[0], digest)
 	if err != nil {
 		panic(err)
 	}
