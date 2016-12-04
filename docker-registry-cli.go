@@ -22,15 +22,15 @@ var (
 	image        = delete.Arg("image", "Image to delete (name:tag)").String()
 )
 
-func getRegistry() *registry.Registry {
+func getRegistry() (*registry.Registry, error) {
 	hub, err := registry.New((*registryUrl).String(), *user, *password)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if !(*debug) {
 		hub.Logf = func(format string, args ...interface{}) {}
 	}
-	return hub
+	return hub, nil
 }
 
 func print(items []string) {
@@ -39,17 +39,31 @@ func print(items []string) {
 	}
 }
 
+func processOutput(items []string, err error) {
+	if err != nil {
+		panic(err)
+	}
+	print(items)
+}
+
 func main() {
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
-	api := NewRegistryApi(getRegistry())
+	registry, err := getRegistry()
+	if err != nil {
+		panic(err)
+	}
+	api := NewRegistryApi(registry)
 	switch cmd {
 	case repositories.FullCommand():
-		print(api.GetAllRepositories())
+		processOutput(api.GetAllRepositories())
 	case images.FullCommand():
-		print(api.GetAllImages())
+		processOutput(api.GetAllImages())
 	case search.FullCommand():
-		print(api.SearchImages(*expression))
+		processOutput(api.SearchImages(*expression))
 	case delete.FullCommand():
-		api.DeleteImage(*image)
+		err := api.DeleteImage(*image)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

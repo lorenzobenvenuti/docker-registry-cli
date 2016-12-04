@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -8,10 +9,10 @@ import (
 )
 
 type RegistryApi interface {
-	GetAllRepositories() []string
-	GetAllImages() []string
-	SearchImages(key string) []string
-	DeleteImage(image string)
+	GetAllRepositories() ([]string, error)
+	GetAllImages() ([]string, error)
+	SearchImages(key string) ([]string, error)
+	DeleteImage(image string) error
 }
 
 type registryApiImpl struct {
@@ -22,53 +23,66 @@ func NewRegistryApi(hub *registry.Registry) RegistryApi {
 	return &registryApiImpl{hub}
 }
 
-func (r *registryApiImpl) GetAllRepositories() []string {
+func (r *registryApiImpl) GetAllRepositories() ([]string, error) {
 	repositories, err := r.hub.Repositories()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return repositories
+	return repositories, nil
 }
 
-func (r *registryApiImpl) GetAllImages() []string {
+func (r *registryApiImpl) GetAllImages() ([]string, error) {
 	images := []string{}
-	for _, repository := range r.GetAllRepositories() {
-		for _, tag := range r.getTags(repository) {
+	repositories, err := r.GetAllRepositories()
+	if err != nil {
+		return nil, err
+	}
+	for _, repository := range repositories {
+		tags, err := r.getTags(repository)
+		if err != nil {
+			return nil, err
+		}
+		for _, tag := range tags {
 			images = append(images, fmt.Sprintf("%s:%s", repository, tag))
 		}
 	}
-	return images
+	return images, nil
 }
 
-func (r *registryApiImpl) getTags(repository string) []string {
+func (r *registryApiImpl) getTags(repository string) ([]string, error) {
 	tags, err := r.hub.Tags(repository)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return tags
+	return tags, nil
 }
 
-func (r *registryApiImpl) SearchImages(key string) []string {
-	images := []string{}
-	for _, image := range r.GetAllImages() {
+func (r *registryApiImpl) SearchImages(key string) ([]string, error) {
+	filteredImages := []string{}
+	allImages, err := r.GetAllImages()
+	if err != nil {
+		return nil, err
+	}
+	for _, image := range allImages {
 		if strings.Index(strings.ToLower(image), strings.ToLower(key)) != -1 {
-			images = append(images, image)
+			filteredImages = append(filteredImages, image)
 		}
 	}
-	return images
+	return filteredImages, nil
 }
 
-func (r *registryApiImpl) DeleteImage(image string) {
+func (r *registryApiImpl) DeleteImage(image string) error {
 	tokens := strings.Split(image, ":")
 	if len(tokens) != 2 {
-		panic("Invalid image, must be in the form image:tag")
+		return errors.New("Invalid image, must be in the form image:tag")
 	}
 	digest, err := r.hub.ManifestDigest(tokens[0], tokens[1])
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = r.hub.DeleteManifest(tokens[0], digest)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
