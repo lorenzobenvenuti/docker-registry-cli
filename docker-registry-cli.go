@@ -33,22 +33,18 @@ func getRegistry() (*registry.Registry, error) {
 	return hub, nil
 }
 
-func print(items []string) {
+func handleResult(items []string, err error) {
+	if err != nil {
+		handleError(err)
+		return
+	}
 	for _, item := range items {
 		fmt.Printf("%s\n", item)
 	}
 }
 
-func processOutput(items []string, err error) {
-	if err != nil {
-		handleError(err)
-		return
-	}
-	print(items)
-}
-
 func handleError(err error) {
-	fmt.Fprintf(os.Stderr, err.Error())
+	fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 	os.Exit(1)
 }
 
@@ -62,11 +58,11 @@ func main() {
 	api := NewRegistryApi(registry)
 	switch cmd {
 	case repositories.FullCommand():
-		processOutput(api.GetAllRepositories())
+		handleResult(api.GetAllRepositories())
 	case images.FullCommand():
-		processOutput(api.GetAllImages())
+		handleResult(api.GetAllImages())
 	case search.FullCommand():
-		processOutput(api.SearchImages(*expression))
+		handleResult(api.SearchImages(*expression))
 	case delete.FullCommand():
 		err := api.DeleteImage(*image)
 		if err != nil {
