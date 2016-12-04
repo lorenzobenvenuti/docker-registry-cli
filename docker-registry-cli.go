@@ -41,16 +41,23 @@ func print(items []string) {
 
 func processOutput(items []string, err error) {
 	if err != nil {
-		panic(err)
+		handleError(err)
+		return
 	}
 	print(items)
+}
+
+func handleError(err error) {
+	fmt.Fprintf(os.Stderr, err.Error())
+	os.Exit(1)
 }
 
 func main() {
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 	registry, err := getRegistry()
 	if err != nil {
-		panic(err)
+		handleError(err)
+		return
 	}
 	api := NewRegistryApi(registry)
 	switch cmd {

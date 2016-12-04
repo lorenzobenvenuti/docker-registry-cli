@@ -24,11 +24,7 @@ func NewRegistryApi(hub *registry.Registry) RegistryApi {
 }
 
 func (r *registryApiImpl) GetAllRepositories() ([]string, error) {
-	repositories, err := r.hub.Repositories()
-	if err != nil {
-		return nil, err
-	}
-	return repositories, nil
+	return r.hub.Repositories()
 }
 
 func (r *registryApiImpl) GetAllImages() ([]string, error) {
@@ -50,11 +46,7 @@ func (r *registryApiImpl) GetAllImages() ([]string, error) {
 }
 
 func (r *registryApiImpl) getTags(repository string) ([]string, error) {
-	tags, err := r.hub.Tags(repository)
-	if err != nil {
-		return nil, err
-	}
-	return tags, nil
+	return r.hub.Tags(repository)
 }
 
 func (r *registryApiImpl) SearchImages(key string) ([]string, error) {
