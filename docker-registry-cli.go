@@ -66,7 +66,7 @@ func main() {
 	case delete.FullCommand():
 		err := api.DeleteImage(*image)
 		if err != nil {
-			panic(err)
+			handleError(err)
 		}
 	}
 }
