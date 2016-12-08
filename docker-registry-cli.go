@@ -34,27 +34,23 @@ func getRegistry() (*registry.Registry, error) {
 }
 
 func handleResult(items []string, err error) {
-	if err != nil {
-		handleError(err)
-		return
-	}
+	failIfErrorIsNotNil(err)
 	for _, item := range items {
 		fmt.Printf("%s\n", item)
 	}
 }
 
-func handleError(err error) {
-	fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-	os.Exit(1)
+func failIfErrorIsNotNil(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
 }
 
 func main() {
 	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 	registry, err := getRegistry()
-	if err != nil {
-		handleError(err)
-		return
-	}
+	failIfErrorIsNotNil(err)
 	api := NewRegistryApi(registry)
 	switch cmd {
 	case repositories.FullCommand():
@@ -64,9 +60,6 @@ func main() {
 	case search.FullCommand():
 		handleResult(api.SearchImages(*expression))
 	case delete.FullCommand():
-		err := api.DeleteImage(*image)
-		if err != nil {
-			handleError(err)
-		}
+		failIfErrorIsNotNil(api.DeleteImage(*image))
 	}
 }
