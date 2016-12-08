@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lorenzobenvenuti/docker-registry-client/registry"
+	"github.com/heroku/docker-registry-client/registry"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 

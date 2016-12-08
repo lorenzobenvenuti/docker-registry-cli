@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lorenzobenvenuti/docker-registry-client/registry"
+	"github.com/heroku/docker-registry-client/registry"
 )
 
 type RegistryApi interface {
